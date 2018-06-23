@@ -84,6 +84,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        System.out.println("Fonytas is here");
+
+
 
         final String path = "location" + "/" + "123";
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
@@ -100,6 +103,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Double lat = (Double)location.get("latitude");
                 Double lng = (Double)location.get("longitude");
                 LatLng current = new LatLng(lat, lng);
+
+//                mMap.addMarker(new MarkerOptions()
+//                        .position(new LatLng(lat, lng))
+//                        .title("Hello world"));
 
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(current).title("ME"));
