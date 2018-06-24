@@ -35,6 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+    private FirebaseAuth mFirebaseAuth;
 
     private static final int PERMISSIONS_REQUEST = 1;
 
@@ -84,7 +85,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        System.out.println("Fonytas is here");
+//        System.out.println("Fonytas is here");
+
+//        FirebaseUser user = mFirebaseAuth.getCurrentUser();
+//        System.out.println("====================================================");
+//
+//        System.out.println(user.getProviderData());
+//
+//        System.out.println("====================================================");
+
 
 
 
@@ -102,8 +111,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // Add a marker and move the camera
                 Double lat = (Double)location.get("latitude");
                 Double lng = (Double)location.get("longitude");
+                System.out.println(lat + ":" + lng);
                 LatLng current = new LatLng(lat, lng);
-
+//
 //                mMap.addMarker(new MarkerOptions()
 //                        .position(new LatLng(lat, lng))
 //                        .title("Hello world"));

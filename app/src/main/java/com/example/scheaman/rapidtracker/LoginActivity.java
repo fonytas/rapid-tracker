@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,12 +34,28 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+//import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+//import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+//import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+//import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.AuthResult;
+
+
+
 import static android.Manifest.permission.READ_CONTACTS;
+import static android.os.Debug.waitForDebugger;
 
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+//    private FirebaseAuth mFirebaseAuth;
+
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -90,6 +107,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 attemptLogin();
             }
         });
+
+//        Button mEmailSignUpButton = (Button) findViewById(R.id.email_sign_up_button);
+//        mEmailSignUpButton.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                attemptLogin();
+//            }
+//        });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
@@ -146,7 +171,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private void attemptLogin() {
 
-        System.out.println("FWTYFefreg");
 
         if (mAuthTask != null) {
             return;
@@ -300,8 +324,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
+
         private final String mEmail;
         private final String mPassword;
+
+        private FirebaseAuth mAuth;
+
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -310,25 +338,57 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Boolean doInBackground(Void... params) {
+            mAuth = FirebaseAuth.getInstance();
             // TODO: attempt authentication against a network service.
+            final String email = mEmailView.getText().toString();
+            final String password = mPasswordView.getText().toString();
 
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
+            final boolean[] status = {false};
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
+
+            mAuth.signInWithEmailAndPassword(email,password)
+                    .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+
+                            if(task.isSuccessful()){
+                                startActivity(new Intent(LoginActivity.this, MapsActivity.class));
+                                status[0] = true;
+                            }
+                            else{
+                                status[0] = false;
+                            }
+                        }
+
+                    })
+                    .addOnFailureListener(LoginActivity.this, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            mAuth.createUserWithEmailAndPassword(email,password)
+                                    .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<AuthResult> task) {
+                                            if(task.isSuccessful()){
+                                                startActivity(new Intent(LoginActivity.this, MapsActivity.class));
+
+                                            }
+                                            status[0] = true;
+                                        }
+                                    });
+                        }
+                    });
+
+//
+
+            return status[0];
+
+
+//
 
             // TODO: register the new account here.
-            return true;
+
+
         }
 
         @Override
